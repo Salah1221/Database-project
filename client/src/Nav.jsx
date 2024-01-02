@@ -1,10 +1,12 @@
 import { Link, useLocation, useNavigate } from "react-router-dom";
+import PropTypes from "prop-types";
 
-const Nav = () => {
+const Nav = ({ setSearch, loggedInUserId }) => {
   const location = useLocation();
   const navigate = useNavigate();
-  const handleChange = () => {
+  const handleChange = (e) => {
     if (location.pathname !== "/products") navigate("/products");
+    setSearch(e.target.value);
   };
   return (
     <header>
@@ -58,11 +60,11 @@ const Nav = () => {
               name="search"
               id="search"
               className="bg-light-gray border-none fs-300"
-              placeholder="Search..."
+              placeholder="Search Products..."
               onChange={handleChange}
             />
           </div>
-          <Link to={"/cart"}>
+          <Link to={`/cart/${loggedInUserId}`}>
             <svg
               width="24"
               height="24"
@@ -84,7 +86,7 @@ const Nav = () => {
               />
             </svg>
           </Link>
-          <Link>
+          <Link to={`/user/${loggedInUserId}`}>
             <svg
               width="24"
               height="24"
@@ -109,3 +111,8 @@ const Nav = () => {
 };
 
 export default Nav;
+
+Nav.propTypes = {
+  setSearch: PropTypes.func.isRequired,
+  loggedInUserId: PropTypes.number,
+};

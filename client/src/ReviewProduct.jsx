@@ -1,9 +1,41 @@
-import { useEffect } from "react";
-import { useParams } from "react-router-dom";
+import { useState } from "react";
+import { useNavigate, useParams } from "react-router-dom";
+import axios from "axios";
+import PropTypes from "prop-types";
 
-const ReviewProduct = () => {
-  const params = useParams();
-  useEffect(() => console.log(params), [params]);
+const ReviewProduct = ({ loggedInUserId }) => {
+  const navigator = useNavigate();
+  const productId = useParams().productId;
+  const [rating, setRating] = useState(null);
+  const [areEmpty, setAreEmpty] = useState(false);
+  const [review, setReview] = useState({
+    title: "",
+    description: "",
+  });
+
+  const handleChange = (e) => {
+    setReview({ ...review, [e.target.name]: e.target.value });
+  };
+
+  const handleClick = () => {
+    if (rating && review.title && review.description) {
+      setAreEmpty(false);
+      axios
+        .post(`http://localhost:3001/review/${loggedInUserId}/${productId}`, {
+          rating,
+          title: review.title,
+          description: review.description,
+        })
+        .then((res) => {
+          console.log(res.status);
+          navigator(`/products/${productId}`);
+        })
+        .catch((err) => console.log(err));
+    } else {
+      setAreEmpty(true);
+    }
+  };
+
   return (
     <main>
       <section className="container grid">
@@ -14,8 +46,11 @@ const ReviewProduct = () => {
           style={{ "--gap": "0rem" }}
         >
           <button
-            className="rating rating--review btn bg-white fs-400 ff-normal flex align-center"
+            className={`rating rating--review btn bg-white fs-400 ff-normal flex align-center ${
+              rating === 1 && "active"
+            }`}
             style={{ "--gap": "0.2rem" }}
+            onClick={() => setRating(1)}
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -32,8 +67,11 @@ const ReviewProduct = () => {
             1
           </button>
           <button
-            className="rating rating--review btn bg-white fs-400 ff-normal flex align-center"
+            className={`rating rating--review btn bg-white fs-400 ff-normal flex align-center ${
+              rating === 2 && "active"
+            }`}
             style={{ "--gap": "0.2rem" }}
+            onClick={() => setRating(2)}
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -50,8 +88,11 @@ const ReviewProduct = () => {
             2
           </button>
           <button
-            className="rating rating--review btn bg-white fs-400 ff-normal flex align-center"
+            className={`rating rating--review btn bg-white fs-400 ff-normal flex align-center ${
+              rating === 3 && "active"
+            }`}
             style={{ "--gap": "0.2rem" }}
+            onClick={() => setRating(3)}
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -68,8 +109,11 @@ const ReviewProduct = () => {
             3
           </button>
           <button
-            className="rating rating--review btn bg-white fs-400 ff-normal flex align-center"
+            className={`rating rating--review btn bg-white fs-400 ff-normal flex align-center ${
+              rating === 4 && "active"
+            }`}
             style={{ "--gap": "0.2rem" }}
+            onClick={() => setRating(4)}
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -86,8 +130,11 @@ const ReviewProduct = () => {
             4
           </button>
           <button
-            className="rating rating--review btn bg-white fs-400 ff-normal flex align-center"
+            className={`rating rating--review btn bg-white fs-400 ff-normal flex align-center ${
+              rating === 5 && "active"
+            }`}
             style={{ "--gap": "0.2rem" }}
+            onClick={() => setRating(5)}
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -109,24 +156,32 @@ const ReviewProduct = () => {
         </label>
         <input
           type="text"
-          name="review-title"
+          name="title"
           className="input text-dark-primary border-none"
           id="review-title"
+          onChange={handleChange}
         />
         <label htmlFor="review" className="ff-display">
           Description
         </label>
         <textarea
-          name="review"
+          name="description"
           id="review"
           cols="30"
           rows="10"
           className="input text-dark-primary border-none"
+          onChange={handleChange}
         ></textarea>
+        {areEmpty && (
+          <span className="fs-300 fw-700 empty text-align-center">
+            Please fill all the fields
+          </span>
+        )}
         <input
           type="submit"
           className="btn bg-dark-primary text-white"
           value="Submit"
+          onClick={handleClick}
         />
       </section>
     </main>
@@ -134,3 +189,7 @@ const ReviewProduct = () => {
 };
 
 export default ReviewProduct;
+
+ReviewProduct.propTypes = {
+  loggedInUserId: PropTypes.number,
+};
