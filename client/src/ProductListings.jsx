@@ -163,5 +163,5 @@ export default ProductListings;
 
 ProductListings.propTypes = {
   search: PropTypes.string,
-  averageRating: PropTypes.object,
+  averageRating: PropTypes.any,
 };

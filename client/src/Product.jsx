@@ -27,6 +27,7 @@ const Product = ({ loggedInUserId }) => {
   const [ratingsInfo, setRatingInfo] = useState({});
   const [hasBought, setHasBought] = useState(false);
   const [hasReviewed, setHasReviewed] = useState(false);
+  const [refresh, setRefresh] = useState(0);
   const [reviews, setReviews] = useState([
     {
       review_id: -1,
@@ -39,6 +40,21 @@ const Product = ({ loggedInUserId }) => {
     },
   ]);
   const [top4, setTop4] = useState([]);
+  const loggedInUserReview = reviews.find(
+    (review) => review.customer_id === loggedInUserId
+  );
+
+  const handleDelete = () => {
+    axios
+      .delete(
+        `http://localhost:3001/review/${loggedInUserId}/${url_params.productId}`
+      )
+      .then(() => {
+        setRefresh((counter) => counter + 1);
+        setHasReviewed(false);
+      })
+      .catch((err) => console.log(err));
+  };
 
   const handleChange = (e) => {
     if (e.target.value < 1 && e.target.value.length > 0) e.target.value = 1;
@@ -84,7 +100,7 @@ const Product = ({ loggedInUserId }) => {
       .get(`http://localhost:3001/products/${url_params.productId}`)
       .then((res) => res.data)
       .then((data) => setProduct(data));
-  }, [url_params.productId]);
+  }, [url_params.productId, refresh]);
 
   useEffect(() => {
     axios
@@ -136,8 +152,8 @@ const Product = ({ loggedInUserId }) => {
       </dialog>
       <main>
         <div
-          className="product-info flex align-start"
-          style={{ "--gap": "3.88rem" }}
+          className="product-info flex justify-center"
+          style={{ "--gap": "0" }}
         >
           <img src={product[0].image_url} alt={product[0].prod_name} />
           <div
@@ -432,35 +448,58 @@ const Product = ({ loggedInUserId }) => {
               )}
             </div>
             <div className="reviews">
-              {reviews.map((review, i) => (
-                <div className="review grid" key={i}>
-                  <div className="review-heading flex align-center">
-                    <div
-                      className="rating rating--review fs-400 flex align-center text-white bg-primary width-fit-content"
-                      style={{ "--gap": "0.2rem" }}
-                    >
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        height="16"
-                        width="18"
-                        viewBox="0 0 576 512"
+              {loggedInUserReview ? (
+                <div className="review grid logged-in-user-review" key={0}>
+                  <div className="review-heading flex space-between align-center">
+                    <div className="flex align-center">
+                      <div
+                        className="rating rating--review fs-400 flex align-center text-white bg-primary width-fit-content"
+                        style={{ "--gap": "0.2rem" }}
                       >
-                        <path
-                          opacity="1"
-                          fill="var(--clr-white)"
-                          d="M316.9 18C311.6 7 300.4 0 288.1 0s-23.4 7-28.8 18L195 150.3 51.4 171.5c-12 1.8-22 10.2-25.7 21.7s-.7 24.2 7.9 32.7L137.8 329 113.2 474.7c-2 12 3 24.2 12.9 31.3s23 8 33.8 2.3l128.3-68.5 128.3 68.5c10.8 5.7 23.9 4.9 33.8-2.3s14.9-19.3 12.9-31.3L438.5 329 542.7 225.9c8.6-8.5 11.7-21.2 7.9-32.7s-13.7-19.9-25.7-21.7L381.2 150.3 316.9 18z"
-                        />
-                      </svg>
-                      {review.rating}
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          height="16"
+                          width="18"
+                          viewBox="0 0 576 512"
+                        >
+                          <path
+                            opacity="1"
+                            fill="var(--clr-white)"
+                            d="M316.9 18C311.6 7 300.4 0 288.1 0s-23.4 7-28.8 18L195 150.3 51.4 171.5c-12 1.8-22 10.2-25.7 21.7s-.7 24.2 7.9 32.7L137.8 329 113.2 474.7c-2 12 3 24.2 12.9 31.3s23 8 33.8 2.3l128.3-68.5 128.3 68.5c10.8 5.7 23.9 4.9 33.8-2.3s14.9-19.3 12.9-31.3L438.5 329 542.7 225.9c8.6-8.5 11.7-21.2 7.9-32.7s-13.7-19.9-25.7-21.7L381.2 150.3 316.9 18z"
+                          />
+                        </svg>
+                        {loggedInUserReview.rating}
+                      </div>
+                      <p className="fs-600 fw-700">
+                        {loggedInUserReview.review_title}
+                      </p>
                     </div>
-                    <p className="fs-600 fw-700">{review.review_title}</p>
+                    <div
+                      className="flex align-center"
+                      style={{ "--gap": "0.5rem" }}
+                    >
+                      <Link
+                        to={`/products/${url_params.productId}/review`}
+                        className="btn bg-primary text-white width-fit-content"
+                      >
+                        Edit
+                      </Link>
+                      <button
+                        className="btn delete-review bg-primary text-white width-fit-content"
+                        onClick={handleDelete}
+                      >
+                        Delete
+                      </button>
+                    </div>
                   </div>
-                  <p className="review-text">{review.review_text}</p>
+                  <p className="review-text">
+                    {loggedInUserReview.review_text}
+                  </p>
                   <p
                     className="customer fw-700 text-dark-gray flex align-center"
                     style={{ "--gap": "0.5rem" }}
                   >
-                    {`${review.first_name} ${review.last_name}`}
+                    {`You`}
                     <span className="checkmark text-white bg-dark-gray">
                       <svg
                         fill="none"
@@ -477,11 +516,83 @@ const Product = ({ loggedInUserId }) => {
                     <span className="fw-400 fs-300">Certified Buyer</span>
                     <span className="fw-400 fs-300">|</span>
                     <span className="fw-400 fs-300">
-                      {timeAgo(new Date(review.review_date))}
+                      {timeAgo(new Date(loggedInUserReview.review_date))}
                     </span>
+                    {loggedInUserReview.is_editted ? (
+                      <>
+                        <span className="fw-400 fs-300">|</span>
+                        <span className="fw-400 fs-300">Edited</span>
+                      </>
+                    ) : (
+                      ""
+                    )}
                   </p>
                 </div>
-              ))}
+              ) : (
+                ""
+              )}
+              {reviews.map((review, i) =>
+                review.customer_id !== loggedInUserId ? (
+                  <div className="review grid" key={i}>
+                    <div className="review-heading flex align-center">
+                      <div
+                        className="rating rating--review fs-400 flex align-center text-white bg-primary width-fit-content"
+                        style={{ "--gap": "0.2rem" }}
+                      >
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          height="16"
+                          width="18"
+                          viewBox="0 0 576 512"
+                        >
+                          <path
+                            opacity="1"
+                            fill="var(--clr-white)"
+                            d="M316.9 18C311.6 7 300.4 0 288.1 0s-23.4 7-28.8 18L195 150.3 51.4 171.5c-12 1.8-22 10.2-25.7 21.7s-.7 24.2 7.9 32.7L137.8 329 113.2 474.7c-2 12 3 24.2 12.9 31.3s23 8 33.8 2.3l128.3-68.5 128.3 68.5c10.8 5.7 23.9 4.9 33.8-2.3s14.9-19.3 12.9-31.3L438.5 329 542.7 225.9c8.6-8.5 11.7-21.2 7.9-32.7s-13.7-19.9-25.7-21.7L381.2 150.3 316.9 18z"
+                          />
+                        </svg>
+                        {review.rating}
+                      </div>
+                      <p className="fs-600 fw-700">{review.review_title}</p>
+                    </div>
+                    <p className="review-text">{review.review_text}</p>
+                    <p
+                      className="customer fw-700 text-dark-gray flex align-center"
+                      style={{ "--gap": "0.5rem" }}
+                    >
+                      {`${review.first_name} ${review.last_name}`}
+                      <span className="checkmark text-white bg-dark-gray">
+                        <svg
+                          fill="none"
+                          viewBox="20 20 40 40"
+                          xmlns="http://www.w3.org/2000/svg"
+                        >
+                          <path
+                            d="M28 39.92 36.08 48l16-16"
+                            stroke="#fff"
+                            strokeWidth="5"
+                          />
+                        </svg>
+                      </span>
+                      <span className="fw-400 fs-300">Certified Buyer</span>
+                      <span className="fw-400 fs-300">|</span>
+                      <span className="fw-400 fs-300">
+                        {timeAgo(new Date(review.review_date))}
+                      </span>
+                      {review.is_editted ? (
+                        <>
+                          <span className="fw-400 fs-300">|</span>
+                          <span className="fw-400 fs-300">Edited</span>
+                        </>
+                      ) : (
+                        ""
+                      )}
+                    </p>
+                  </div>
+                ) : (
+                  ""
+                )
+              )}
             </div>
           </div>
         </section>

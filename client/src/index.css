@@ -7,6 +7,7 @@
   --clr-white: hsl(0, 0%, 100%);
   --clr-border-dark: hsl(252, 22%, 82%);
   --clr-dark-gray: hsl(248, 12%, 49%);
+  --clr-red: rgb(186, 0, 0);
 
   --fs-900: 2.25rem;
   --fs-800: 2rem;
@@ -16,8 +17,8 @@
   --fs-400: 1rem;
   --fs-300: 0.875rem;
 
-  --ff-display: "Clash Display", Inter, sans-serif;
-  --ff-normal: "Satoshi", Inter, sans-serif;
+  --ff-display: "Clash Display", system-ui, Inter, sans-serif;
+  --ff-normal: "Satoshi", system-ui, Inter, sans-serif;
 }
 
 /* CSS Reset */
@@ -475,12 +476,40 @@ footer {
   width: 6rem;
 }
 
+.product-info {
+  position: relative;
+}
+
+.product-info::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  /* creating dotted pattern */
+  background: radial-gradient(
+      circle at center,
+      var(--clr-border-dark) 25%,
+      transparent 25%
+    ),
+    radial-gradient(
+      circle at center,
+      var(--clr-border-gray) 25%,
+      transparent 25%
+    );
+  background-size: 25px 25px, 25px 25px;
+  background-position: 0 0, 12.5px 12.5px;
+  z-index: -1;
+}
+
 .product-info .info-card {
-  padding: 2.5rem;
+  padding-block: 2.5rem;
+  padding-inline: 6.38rem;
+  aspect-ratio: 1 / 1;
+  max-width: 721px;
+  height: 100%;
 }
 
 .product-info > img {
-  aspect-ratio: 1 / 1.05;
+  aspect-ratio: 1 / 1;
   object-fit: cover;
   object-position: center center;
   width: 721px;
@@ -607,7 +636,7 @@ footer {
 }
 
 .delete-btn {
-  background-color: rgb(186, 0, 0);
+  background-color: var(--clr-red);
   aspect-ratio: 1 / 1;
   border: none;
   display: grid;
@@ -680,7 +709,7 @@ footer {
 .rePassword-input-container span.no {
   display: grid;
   place-items: center;
-  background-color: rgb(186, 0, 0);
+  background-color: var(--clr-red);
 }
 
 .empty {
@@ -756,4 +785,12 @@ a.disabled {
   background-color: #eee;
   color: gray;
   pointer-events: none;
+}
+
+.logged-in-user-review {
+  border: 3px solid var(--clr-border-dark);
+}
+
+.delete-review {
+  background-color: var(--clr-red);
 }

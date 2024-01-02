@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import axios from "axios";
 import PropTypes from "prop-types";
@@ -8,33 +8,71 @@ const ReviewProduct = ({ loggedInUserId }) => {
   const productId = useParams().productId;
   const [rating, setRating] = useState(null);
   const [areEmpty, setAreEmpty] = useState(false);
+  const [isEditted, setIsEditted] = useState(0);
   const [review, setReview] = useState({
     title: "",
     description: "",
   });
+  const [oldReview, setOldReview] = useState({});
 
   const handleChange = (e) => {
     setReview({ ...review, [e.target.name]: e.target.value });
+    if (Object.keys(oldReview).length !== 0) setIsEditted(1);
+  };
+
+  const handleSetRating = (stars) => {
+    setRating(stars);
+    if (Object.keys(oldReview).length !== 0) setIsEditted(1);
   };
 
   const handleClick = () => {
     if (rating && review.title && review.description) {
       setAreEmpty(false);
-      axios
-        .post(`http://localhost:3001/review/${loggedInUserId}/${productId}`, {
-          rating,
-          title: review.title,
-          description: review.description,
-        })
-        .then((res) => {
-          console.log(res.status);
-          navigator(`/products/${productId}`);
-        })
-        .catch((err) => console.log(err));
+      if (Object.keys(oldReview).length === 0)
+        axios
+          .post(`http://localhost:3001/review/${loggedInUserId}/${productId}`, {
+            rating,
+            title: review.title,
+            description: review.description,
+          })
+          .then((res) => {
+            console.log(res.status);
+            navigator(`/products/${productId}`);
+          })
+          .catch((err) => console.log(err));
+      else
+        axios
+          .put(`http://localhost:3001/review/${loggedInUserId}/${productId}`, {
+            rating,
+            title: review.title,
+            description: review.description,
+            isEditted,
+          })
+          .then((res) => {
+            console.log(res.data);
+            navigator(`/products/${productId}`);
+          })
+          .catch((err) => console.log(err));
     } else {
       setAreEmpty(true);
     }
   };
+
+  useEffect(() => {
+    axios
+      .get(`http://localhost:3001/review/${loggedInUserId}/${productId}`)
+      .then((res) => res.data)
+      .then((data) => {
+        setRating(data.rating);
+        setOldReview(data);
+        setReview({
+          title: data.review_title ?? "",
+          description: data.review_text ?? "",
+        });
+        setIsEditted(data.is_editted);
+      })
+      .catch((err) => console.log(err));
+  }, [loggedInUserId, productId]);
 
   return (
     <main>
@@ -50,7 +88,7 @@ const ReviewProduct = ({ loggedInUserId }) => {
               rating === 1 && "active"
             }`}
             style={{ "--gap": "0.2rem" }}
-            onClick={() => setRating(1)}
+            onClick={() => handleSetRating(1)}
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -71,7 +109,7 @@ const ReviewProduct = ({ loggedInUserId }) => {
               rating === 2 && "active"
             }`}
             style={{ "--gap": "0.2rem" }}
-            onClick={() => setRating(2)}
+            onClick={() => handleSetRating(2)}
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -92,7 +130,7 @@ const ReviewProduct = ({ loggedInUserId }) => {
               rating === 3 && "active"
             }`}
             style={{ "--gap": "0.2rem" }}
-            onClick={() => setRating(3)}
+            onClick={() => handleSetRating(3)}
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -113,7 +151,7 @@ const ReviewProduct = ({ loggedInUserId }) => {
               rating === 4 && "active"
             }`}
             style={{ "--gap": "0.2rem" }}
-            onClick={() => setRating(4)}
+            onClick={() => handleSetRating(4)}
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -134,7 +172,7 @@ const ReviewProduct = ({ loggedInUserId }) => {
               rating === 5 && "active"
             }`}
             style={{ "--gap": "0.2rem" }}
-            onClick={() => setRating(5)}
+            onClick={() => handleSetRating(5)}
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -160,6 +198,7 @@ const ReviewProduct = ({ loggedInUserId }) => {
           className="input text-dark-primary border-none"
           id="review-title"
           onChange={handleChange}
+          defaultValue={oldReview.review_title || ""}
         />
         <label htmlFor="review" className="ff-display">
           Description
@@ -171,6 +210,7 @@ const ReviewProduct = ({ loggedInUserId }) => {
           rows="10"
           className="input text-dark-primary border-none"
           onChange={handleChange}
+          defaultValue={oldReview.review_text || ""}
         ></textarea>
         {areEmpty && (
           <span className="fs-300 fw-700 empty text-align-center">

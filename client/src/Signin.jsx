@@ -41,9 +41,10 @@ const Signin = ({ setLoggedInUserId }) => {
         localStorage.setItem("id", data.id);
         setUserData(data);
         setLoggedInUserId(data.id);
-      })
-      .finally(() => {
         navigator("/");
+      })
+      .catch((err) => {
+        console.log(err);
       });
     console.log(userData);
   };

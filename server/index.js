@@ -313,6 +313,56 @@ app.post("/review/:userId/:productId", (req, res) => {
   );
 });
 
+app.get("/review/:userId/:productId", (req, res) => {
+  const userId = req.params.userId;
+  const productId = req.params.productId;
+  let sql = `SELECT * FROM reviews WHERE customer_id = ${userId} AND product_id = ${productId}`;
+  connection.query(sql, (err, result, fields) => {
+    if (err) {
+      console.log(err);
+      throw err;
+    }
+    res.status(200).json(result[0]);
+  });
+});
+
+app.put("/review/:userId/:productId", (req, res) => {
+  const userId = req.params.userId;
+  const productId = req.params.productId;
+  const { rating, title, description, isEditted } = req.body;
+  let sql = `UPDATE reviews 
+  SET
+    rating = ?, 
+    review_title = ?, 
+    review_text = ?,
+    is_editted = ?
+  WHERE customer_id = ? AND product_id = ?`;
+  connection.query(
+    sql,
+    [rating, title, description, isEditted, userId, productId],
+    (err, result, fields) => {
+      if (err) {
+        console.log(err);
+        throw err;
+      }
+      res.status(200).send(result);
+    }
+  );
+});
+
+app.delete("/review/:userId/:productId", (req, res) => {
+  const userId = req.params.userId;
+  const productId = req.params.productId;
+  let sql = `DELETE FROM reviews WHERE customer_id = ? AND product_id = ?`;
+  connection.query(sql, [userId, productId], (err, result, fields) => {
+    if (err) {
+      console.log(err);
+      throw err;
+    }
+    res.status(200).json(result);
+  });
+});
+
 app.get("/reviews/:productId", (req, res) => {
   const productId = req.params.productId;
   let sql = `SELECT * FROM reviews 
