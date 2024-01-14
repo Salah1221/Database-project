@@ -498,12 +498,12 @@ footer {
   /* creating dotted pattern */
   background: radial-gradient(
       circle at center,
-      var(--clr-border-dark) 25%,
+      var(--clr-border-dark) calc(25% - 0.5px),
       transparent 25%
     ),
     radial-gradient(
       circle at center,
-      var(--clr-border-gray) 25%,
+      var(--clr-border-gray) calc(25% - 0.5px),
       transparent 25%
     );
   background-size: 25px 25px, 25px 25px;

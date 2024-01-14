@@ -37,9 +37,6 @@ const upload = multer({
   limits: { fileSize: 1024 * 1024 },
 });
 
-let categories,
-  checkedCategories = [];
-
 const connection = mysql.createConnection({
   host: "localhost",
   user: "root",
@@ -319,47 +316,48 @@ app.post("/checkout/:userId/:orderId", (req, res) => {
   });
 });
 
+let categories,
+  checkedCategories = [];
+let filteredCategories = [];
+
 app.post("/checked-categories", (req, res) => {
   checkedCategories = req.body;
   res.status(200).send("Sent Successfully");
 });
-
-let filteredCategories = [];
-
 app.get("/products", (req, res) => {
   let whereString = "";
   let searchString = "";
-  const filterPrice = req.query.price;
-  let sql = `SELECT * FROM products 
-  INNER JOIN categories 
-  ON products.category_id = categories.category_id
-  WHERE is_deleted = 0
-  ORDER BY IF(sale_price IS NOT NULL, sale_price, price)${
-    filterPrice === "highest" ? " DESC" : ""
-  }`;
+  const filterPrice = req.query.price === "highest" ? "DESC" : "ASC";
+
+  connection.query(`SELECT * FROM categories`, (err, results, fields) => {
+    if (err) throw err;
+    categories = results;
+  });
   const search = req.query.search ?? "";
-  if (checkedCategories && categories)
+  if (checkedCategories.length && categories)
     filteredCategories = categories.filter((_, i) => checkedCategories[i]);
-  if (filteredCategories) {
+  if (filteredCategories.length > 0) {
     filteredCategories.forEach((category, i, catArr) => {
       whereString += `categories.category_id = ${category.category_id}`;
       if (i < catArr.length - 1) whereString += " OR ";
     });
   }
   if (search) {
-    searchString += `prod_name LIKE '%${search}%'`;
+    searchString += `AND prod_name LIKE '%${search}%'`;
   }
+  let sql = `SELECT * FROM products 
+  INNER JOIN categories 
+  ON products.category_id = categories.category_id
+  WHERE is_deleted = 0 ${searchString}
+  ORDER BY IF(sale_price IS NULL, price, sale_price) ${filterPrice}
+  `;
   if (whereString) {
     sql = `SELECT * FROM products 
     INNER JOIN categories 
     ON products.category_id = categories.category_id 
-    WHERE ${whereString} AND is_deleted = 0
-    ORDER BY IF(sale_price IS NOT NULL, sale_price, price)${
-      filterPrice === "highest" ? " DESC" : ""
-    }`;
-  }
-  if (searchString) {
-    sql += ` AND ${searchString}`;
+    WHERE ${whereString} AND is_deleted = 0 ${searchString}
+    ORDER BY IF(sale_price IS NULL, price, sale_price) ${filterPrice}
+    `;
   }
   connection.query(sql, async (err, result, fields) => {
     if (err) throw err;
