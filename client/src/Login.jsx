@@ -3,7 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
 import PropTypes from "prop-types";
 
-const Login = ({ setLoggedInUserId }) => {
+const Login = ({ setLoggedInUserId, setIsAdmin }) => {
   const navigator = useNavigate();
   const [invalidCredentials, setInvalidCredentials] = useState(false);
   const [userData, setUserData] = useState({
@@ -24,6 +24,7 @@ const Login = ({ setLoggedInUserId }) => {
         console.log(data);
         localStorage.setItem("id", data.id);
         setLoggedInUserId(data.id);
+        setIsAdmin(data.isAdmin);
         if (data.id) navigator("/");
       })
       .catch((error) => {
@@ -96,4 +97,5 @@ export default Login;
 Login.propTypes = {
   loggedInUserId: PropTypes.number,
   setLoggedInUserId: PropTypes.func.isRequired,
+  setIsAdmin: PropTypes.func,
 };

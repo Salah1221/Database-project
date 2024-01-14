@@ -7,6 +7,8 @@ const ProductListings = ({ search, averageRating }) => {
   const [products, setProducts] = useState([]);
   const [categories, setCategories] = useState([]);
   const [checkedCategories, setCheckedCategories] = useState([]);
+  const [filterPrice, setFilterPrice] = useState("lowest");
+
   useEffect(() => {
     axios
       .get("http://localhost:3001/categories")
@@ -24,7 +26,9 @@ const ProductListings = ({ search, averageRating }) => {
         console.log(res.status);
         axios
           .get(
-            `http://localhost:3001/products${search ? `?search=${search}` : ""}`
+            `http://localhost:3001/products?price=${filterPrice}${
+              search ? `&search=${search}` : ""
+            }`
           )
           .then((res) => res.data)
           .then((data) => {
@@ -32,7 +36,7 @@ const ProductListings = ({ search, averageRating }) => {
           })
           .catch((err) => console.log(err));
       });
-  }, [checkedCategories, search]);
+  }, [checkedCategories, search, filterPrice]);
   return (
     <>
       <div
@@ -86,6 +90,18 @@ const ProductListings = ({ search, averageRating }) => {
                   </li>
                 ))}
               </ul>
+            </div>
+            <div className="grid" style={{ "--gap": "1rem" }}>
+              <label htmlFor="price-sort">Price (with discount):</label>
+              <select
+                name="price-sort"
+                id="price-sort"
+                className="border input width-fit-content"
+                onChange={(e) => setFilterPrice(e.target.value)}
+              >
+                <option value="lowest">Lowest to Highest</option>
+                <option value="highest">Highest to Lowest</option>
+              </select>
             </div>
           </aside>
           <section className="all-products">

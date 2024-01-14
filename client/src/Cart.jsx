@@ -1,9 +1,9 @@
 import { useEffect, useState, Fragment } from "react";
 import axios from "axios";
-import PropTypes from "prop-types";
-import { Link } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
 
-const Cart = ({ loggedInUserId }) => {
+const Cart = () => {
+  const loggedInUserId = useParams().userId;
   const [cart, setCart] = useState({
     items: [
       {
@@ -150,7 +150,3 @@ const Cart = ({ loggedInUserId }) => {
 };
 
 export default Cart;
-
-Cart.propTypes = {
-  loggedInUserId: PropTypes.number,
-};

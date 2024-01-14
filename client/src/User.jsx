@@ -31,7 +31,7 @@ const User = () => {
         <div className="flex align-center">
           <img src="/src/assets/home/User--avatar.svg" alt="user avatar" />
           <h1 className="fs-900 ff-display fw-400">
-            {userData[0].first_name} {userData[0].last_name}
+            {userData.first_name} {userData.last_name}
           </h1>
         </div>
         <div className="grid" style={{ "--gap": "0.5rem" }}>
@@ -41,7 +41,7 @@ const User = () => {
             name="email"
             id="email"
             className="input border-none"
-            value={userData[0].email}
+            value={userData.email}
             disabled
           />
         </div>
@@ -52,7 +52,7 @@ const User = () => {
             name="password"
             id="password"
             className="input border-none margin-bottom"
-            value={userData[0].password}
+            value={userData.password}
             disabled
           />
         </div>

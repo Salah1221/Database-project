@@ -4,7 +4,7 @@ import axios from "axios";
 import PropTypes from "prop-types";
 import { timeAgo } from "./timeAgo";
 
-const Product = ({ loggedInUserId }) => {
+const Product = ({ loggedInUserId, averageRating }) => {
   const navigator = useNavigate();
   const url_params = useParams();
   const ref = useRef(null);
@@ -28,6 +28,7 @@ const Product = ({ loggedInUserId }) => {
   const [hasBought, setHasBought] = useState(false);
   const [hasReviewed, setHasReviewed] = useState(false);
   const [refresh, setRefresh] = useState(0);
+  const [isInWishlist, setIsInWishlist] = useState(false);
   const [reviews, setReviews] = useState([
     {
       review_id: -1,
@@ -56,8 +57,9 @@ const Product = ({ loggedInUserId }) => {
       .catch((err) => console.log(err));
   };
 
-  const handleChange = (e) => {
+  const handleChange = (e, stock) => {
     if (e.target.value < 1 && e.target.value.length > 0) e.target.value = 1;
+    if (e.target.value > stock) e.target.value = stock;
     setQuantity(e.target.value);
   };
   const handleAddToCart = () => {
@@ -69,8 +71,33 @@ const Product = ({ loggedInUserId }) => {
       .then((res) => {
         console.log(res.status);
         ref.current.showModal();
-      });
+      })
+      .catch((err) => console.log(err));
   };
+  const handleWishlist = () => {
+    if (!isInWishlist) {
+      axios
+        .post(`http://localhost:3001/wishlist/${loggedInUserId}`, {
+          productId: url_params.productId,
+        })
+        .then((res) => {
+          console.log(res.status);
+        })
+        .catch((err) => console.log(err));
+    } else {
+      axios
+        .delete(
+          `http://localhost:3001/wishlist/${loggedInUserId}/${url_params.productId}`
+        )
+        .then((res) => console.log(res.status))
+        .catch((err) => console.log(err));
+    }
+    setIsInWishlist((inWishlist) => !inWishlist);
+  };
+
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [url_params.productId]);
 
   useEffect(() => {
     axios
@@ -113,6 +140,16 @@ const Product = ({ loggedInUserId }) => {
   useEffect(() => {
     axios
       .get(
+        `http://localhost:3001/is-in-wishlist/${loggedInUserId}/${url_params.productId}`
+      )
+      .then((res) => res.data)
+      .then((data) => setIsInWishlist(data.isInWishlist))
+      .catch((err) => console.log(err));
+  }, [loggedInUserId, url_params.productId]);
+
+  useEffect(() => {
+    axios
+      .get(
         `http://localhost:3001/has-user-purchased-product/${loggedInUserId}/${url_params.productId}`
       )
       .then((res) => res.data)
@@ -151,10 +188,7 @@ const Product = ({ loggedInUserId }) => {
         </div>
       </dialog>
       <main>
-        <div
-          className="product-info flex justify-center"
-          style={{ "--gap": "0" }}
-        >
+        <div className="product-info" style={{ "--gap": "0" }}>
           <img src={product[0].image_url} alt={product[0].prod_name} />
           <div
             className="info-card bg-white grid"
@@ -221,27 +255,47 @@ const Product = ({ loggedInUserId }) => {
                 </div>
               </div>
             </div>
-            <div className="quantity flex align-center">
-              <p className="ff-display" style={{ "--mb": "1rem" }}>
-                Quantity:
-              </p>
-              <input
-                type="number"
-                className="quantity-input bg-light-gray text-dark-primary text-align-center border-none"
-                defaultValue={"1"}
-                min={"1"}
-                onChange={handleChange}
-              />
+            <div className="flex space-between align-center">
+              {product[0].stock > 0 ? (
+                <div className="quantity flex align-center">
+                  <p className="ff-display" style={{ "--mb": "1rem" }}>
+                    Quantity:
+                  </p>
+                  <input
+                    type="number"
+                    className="quantity-input bg-light-gray text-dark-primary text-align-center border-none"
+                    defaultValue={"1"}
+                    min={"1"}
+                    onChange={(e) => handleChange(e, product[0].stock)}
+                  />
+                </div>
+              ) : (
+                ""
+              )}
+              {product[0].stock <= 7 && product[0].stock > 0 ? (
+                <p className="fs-300 text-primary">
+                  Only {product[0].stock} left in stock
+                </p>
+              ) : (
+                ""
+              )}
             </div>
-            <div className="btns flex" style={{ "--gap": "1rem" }}>
+            <div className="btns flex align-center" style={{ "--gap": "1rem" }}>
+              {product[0].stock ? (
+                <button
+                  onClick={handleAddToCart}
+                  className="btn bg-dark-primary text-white width-fit-content"
+                >
+                  Add to cart
+                </button>
+              ) : (
+                <p className="fs-500 text-primary out-of-stock">Out of stock</p>
+              )}
               <button
-                onClick={handleAddToCart}
-                className="btn bg-dark-primary text-white width-fit-content"
+                onClick={handleWishlist}
+                className="btn bg-light-gray text-dark-primary width-fit-content"
               >
-                Add to cart
-              </button>
-              <button className="btn bg-light-gray text-dark-primary width-fit-content">
-                Add to wishlist
+                {!isInWishlist ? "Add to wishlist" : "Remove from wishlist"}
               </button>
             </div>
           </div>
@@ -630,7 +684,7 @@ const Product = ({ loggedInUserId }) => {
                           d="M316.9 18C311.6 7 300.4 0 288.1 0s-23.4 7-28.8 18L195 150.3 51.4 171.5c-12 1.8-22 10.2-25.7 21.7s-.7 24.2 7.9 32.7L137.8 329 113.2 474.7c-2 12 3 24.2 12.9 31.3s23 8 33.8 2.3l128.3-68.5 128.3 68.5c10.8 5.7 23.9 4.9 33.8-2.3s14.9-19.3 12.9-31.3L438.5 329 542.7 225.9c8.6-8.5 11.7-21.2 7.9-32.7s-13.7-19.9-25.7-21.7L381.2 150.3 316.9 18z"
                         />
                       </svg>
-                      4.5
+                      {averageRating[prod.product_id] ?? 0}
                     </div>
                   </div>
                   <span className="price">
@@ -667,4 +721,5 @@ export default Product;
 
 Product.propTypes = {
   loggedInUserId: PropTypes.number,
+  averageRating: PropTypes.object,
 };

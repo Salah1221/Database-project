@@ -1,10 +1,10 @@
 import { useEffect, useState, useRef } from "react";
 import axios from "axios";
-import PropTypes from "prop-types";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useParams } from "react-router-dom";
 import countries from "./countries";
 
-const Checkout = ({ loggedInUserId }) => {
+const Checkout = () => {
+  const loggedInUserId = useParams().userId;
   const ref = useRef();
   const navgiator = useNavigate();
   const [cartItems, setCartItems] = useState({
@@ -207,7 +207,3 @@ const Checkout = ({ loggedInUserId }) => {
 };
 
 export default Checkout;
-
-Checkout.propTypes = {
-  loggedInUserId: PropTypes.number,
-};
