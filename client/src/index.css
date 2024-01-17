@@ -1003,3 +1003,21 @@ a.disabled {
 .user-info {
   padding: 1rem;
 }
+
+.cell-prod-name {
+  position: relative;
+}
+
+.deleted_label {
+  position: absolute;
+  left: -3rem;
+  top: 50%;
+  translate: 0 -50%;
+  aspect-ratio: 1 / 1;
+  width: 30px;
+  background-color: var(--clr-red);
+  display: grid;
+  place-items: center;
+  font-size: 0.75rem;
+  color: white;
+}

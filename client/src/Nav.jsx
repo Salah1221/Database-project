@@ -20,15 +20,6 @@ const Nav = ({ setSearch, loggedInUserId }) => {
               <li>
                 <Link to={"/products"}>View collection</Link>
               </li>
-              <li>
-                <Link>Vases</Link>
-              </li>
-              <li>
-                <Link>Tables</Link>
-              </li>
-              <li>
-                <Link>Chairs</Link>
-              </li>
             </ul>
           </nav>
         </div>

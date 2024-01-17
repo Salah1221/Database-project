@@ -11,6 +11,7 @@ const AddProduct = () => {
   const [image, setImage] = useState(null);
   const navigator = useNavigate();
   const productId = useParams().productId;
+  const [empty, setEmpty] = useState(false);
 
   const handleChange = (e) => {
     setData({ ...data, [e.target.name]: e.target.value });
@@ -22,6 +23,20 @@ const AddProduct = () => {
   };
 
   const handleUpload = () => {
+    const requiredFields = [
+      "prod_name",
+      "description",
+      "category_id",
+      "weight",
+      "stock",
+      "price",
+    ];
+    for (let field of requiredFields) {
+      if (!data[field]) {
+        setEmpty(true);
+        return;
+      }
+    }
     const formData = new FormData();
     formData.append("product-image", selectedImage);
     for (let key in data) {
@@ -34,7 +49,10 @@ const AddProduct = () => {
       );
     if (productId) {
       formData.append("oldImage", oldData.image_url);
-      console.log(data);
+      if (!oldData.image_url) {
+        setEmpty(true);
+        return;
+      } else setEmpty(false);
       axios
         .put(`http://localhost:3001/products/${productId}`, formData)
         .then((res) => {
@@ -43,6 +61,10 @@ const AddProduct = () => {
         })
         .catch((err) => console.log(err));
     } else {
+      if (!selectedImage) {
+        setEmpty(true);
+        return;
+      } else setEmpty(false);
       axios
         .post("http://localhost:3001/upload", formData)
         .then((res) => {
@@ -52,6 +74,10 @@ const AddProduct = () => {
         .catch((err) => console.log(err));
     }
   };
+
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [empty, productId]);
 
   useEffect(() => {
     if (productId) {
@@ -88,6 +114,11 @@ const AddProduct = () => {
         className="container grid add-product"
         style={{ "--gap": "2rem" }}
       >
+        {empty && (
+          <div className="empty-fields">
+            <p className="empty">Please fill in all the fields</p>
+          </div>
+        )}
         <h1 className="fs-900 ff-display fw-400 margin-bottom">Add Product</h1>
         <div className="grid" style={{ "--gap": "1rem" }}>
           {image && <img src={image} alt="" />}

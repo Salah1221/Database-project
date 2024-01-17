@@ -57,7 +57,14 @@ const OrderDetails = () => {
           <div className="first-row cell">Discount</div>
           {orderDetails.map((product, i) => (
             <Fragment key={i}>
-              <p className="fs-500 fw-700 cell">{product.prod_name}</p>
+              <p className="fs-500 fw-700 cell cell-prod-name">
+                {product.prod_name}{" "}
+                {product.is_deleted ? (
+                  <span className="deleted_label">N/A</span>
+                ) : (
+                  ""
+                )}
+              </p>
               <div className="quantity cell">{product.quantity}</div>
               <div className="price cell">{product.unit_price}</div>
               <div className="disc cell">

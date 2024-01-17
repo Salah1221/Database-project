@@ -16,8 +16,14 @@ const Signin = ({ setLoggedInUserId }) => {
   });
   const handleChange = (e) => {
     setUserData({ ...userData, [e.target.name]: e.target.value });
-    if (e.target.name === "rePassword") {
-      if (e.target.value === userData.password) setIdenticalPassword("yes");
+    if (e.target.name === "rePassword" || e.target.name === "password") {
+      if (
+        e.target.value ===
+        (e.target.name === "rePassword"
+          ? userData.password
+          : userData.rePassword)
+      )
+        setIdenticalPassword("yes");
       else if (userData.password) setIdenticalPassword("no");
       else setIdenticalPassword("");
     }

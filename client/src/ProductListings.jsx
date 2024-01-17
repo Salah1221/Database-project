@@ -164,9 +164,6 @@ const ProductListings = ({ search, averageRating }) => {
                   </Link>
                 ))}
               </div>
-              <button className="btn bg-light-gray text-dark-primary width-fit-content self-center">
-                Load more
-              </button>
             </div>
           </section>
         </div>
