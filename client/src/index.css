@@ -95,6 +95,9 @@ h6 {
 .bg-dark-gray {
   background-color: var(--clr-dark-gray);
 }
+.bg-danger {
+  background-color: var(--clr-red);
+}
 
 .text-dark-primary {
   color: var(--clr-dark-primary);
@@ -1020,4 +1023,9 @@ a.disabled {
   place-items: center;
   font-size: 0.75rem;
   color: white;
+}
+
+.admin-tag {
+  padding: 0.5rem;
+  border-radius: 5px;
 }

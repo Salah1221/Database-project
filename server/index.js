@@ -155,6 +155,15 @@ app.get("/user/:userId", (req, res) => {
   });
 });
 
+app.delete("/user/:userId", (req, res) => {
+  const userId = req.params.userId;
+  let sql = `DELETE FROM users WHERE user_id = ${userId}`;
+  connection.query(sql, (err, result, fields) => {
+    if (err) console.log(err);
+    res.status(200).json(result);
+  });
+});
+
 app.get("/users", (req, res) => {
   let sql = `
   SELECT email, password, first_name, last_name, SUM(order_total) as total_purchased 

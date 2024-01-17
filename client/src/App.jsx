@@ -59,6 +59,9 @@ function App() {
         setIsAdmin(data.role === "admin");
       });
   }, [loggedInUserId]);
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [location.pathname]);
 
   return (
     <div className="app">
