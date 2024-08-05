@@ -4,6 +4,10 @@ import mysql from "mysql2";
 import bodyParser from "body-parser";
 import multer from "multer";
 import path from "path";
+import { fileURLToPath } from "url";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const app = express();
 const corsOptions = {
@@ -14,6 +18,8 @@ const corsOptions = {
 app.use(cors(corsOptions));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
+
+app.use(express.static(path.join(__dirname, "../client/dist")));
 
 const PORT = 3001;
 
@@ -39,8 +45,8 @@ const upload = multer({
 
 const connection = mysql.createConnection({
   host: "localhost",
-  user: "root",
-  password: "root",
+  user: "admin",
+  password: "password",
   database: "furnitureecommerce",
   keepAliveInitialDelay: 10000,
   enableKeepAlive: true,
@@ -700,6 +706,10 @@ app.get("/orders/:orderId", (req, res) => {
     if (err) throw err;
     res.status(200).json(result);
   });
+});
+
+app.get("*", (req, res) => {
+  res.sendFile(path.join(__dirname, "../client/dist", "index.html"));
 });
 
 app.listen(PORT, () => {
